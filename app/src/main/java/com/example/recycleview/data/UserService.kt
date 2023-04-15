@@ -20,7 +20,8 @@ class UserService {
                 name = faker.name().name(),
                 company = faker.company().name(),
                 photo = IMAGES[it % IMAGES.size]
-            ) }.toMutableList()
+            )
+        }.toMutableList()
     }
 
     fun getUsers(): List<User> {
@@ -29,9 +30,13 @@ class UserService {
 
     fun deleteUser(user: User) {
         val indexToDelete = users.indexOfFirst { it.id == user.id }
-        if (indexToDelete != -1)
+        if (indexToDelete != -1) {
+            // для DiffUtil, чтобы не было проблемы мутабельности данных,
+            // создадим новый список на базе старого списка и элемнет удалим уже из него
+            users = ArrayList(users)
             users.removeAt(indexToDelete)
-        notifyChanges()
+            notifyChanges()
+        }
     }
 
     fun moveUser(user: User, moveBy: Int) {
@@ -39,7 +44,17 @@ class UserService {
         if (oldIndex == -1) return
         val newIndex = oldIndex + moveBy
         if (newIndex < 0 || newIndex >= users.size) return
+        users = ArrayList(users)
         Collections.swap(users, oldIndex, newIndex)
+        notifyChanges()
+    }
+
+    fun fireUse(user: User) {
+        val index = users.indexOfFirst { it.id == user.id }
+        if (index == -1) return
+        val updateUser = users[index].copy(company = "")
+        users = ArrayList(users)
+        users[index] = updateUser
         notifyChanges()
     }
 

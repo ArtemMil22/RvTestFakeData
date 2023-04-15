@@ -3,6 +3,7 @@ package com.example.recycleview.presentation
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recycleview.data.User
 import com.example.recycleview.databinding.ActivityMainBinding
@@ -40,11 +41,21 @@ class MainActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
+
+            override fun onFireUse(user: User) {
+                usersService.fireUse(user)
+            }
         })
 
         val layoutManager = LinearLayoutManager(this)
         binding.recycleView.layoutManager = layoutManager
         binding.recycleView.adapter = adapter
+
+        //решаем вопрос стандартной анимации в rv
+        val itemAnimator = binding.recycleView.itemAnimator
+        if(itemAnimator is DefaultItemAnimator){
+            itemAnimator.supportsChangeAnimations = false
+        }
 
         usersService.addListener(usersListener)
     }

@@ -11,4 +11,6 @@ interface UserActionListener {
     //когда юзер просто нажимает на элемент из списка
     fun onUserDetails(user: User)
 
+    fun onFireUse(user:User)
+
 }

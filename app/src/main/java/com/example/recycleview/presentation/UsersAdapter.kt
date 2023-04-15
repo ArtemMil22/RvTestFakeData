@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.recycleview.R
@@ -31,8 +32,11 @@ class UsersAdapter(
     var users: List<User> = emptyList()
         @SuppressLint("NotifyDataSetChanged")
         set(newValue) {
+            val diffCallBack = UserDiffCallBack(field, newValue)
+            val diffResult = DiffUtil.calculateDiff(diffCallBack, true)
             field = newValue
-            notifyDataSetChanged()
+            diffResult.dispatchUpdatesTo(this)
+            //notifyDataSetChanged()
         }
 
     // в качестве аргумента приходит вьюшка на которую юзер нажал
@@ -44,9 +48,10 @@ class UsersAdapter(
                 // реализация контекстного меню
                 showPopupMenu(v)
             }
-            else ->  actionListener.onUserDetails(user)
+            else -> actionListener.onUserDetails(user)
         }
     }
+
     // фун для popupMenu с тремя действиями и у каждого
     // должен быть свой индификатор в компаньоне обжекте
     private fun showPopupMenu(view: View) {
@@ -63,7 +68,7 @@ class UsersAdapter(
             0, ID_MOVE_UP, Menu.NONE, context.getString(R.string.move_up)
         ).apply {
             //опция переместить пользователя вверх доступна только если индекс > 0
-           isEnabled = position > 0
+            isEnabled = position > 0
         }
         popupMenu.menu.add(
             0, ID_MOVE_DOWN, Menu.NONE, context.getString(R.string.move_down)
@@ -71,19 +76,26 @@ class UsersAdapter(
         popupMenu.menu.add(
             0, ID_REMOVE, Menu.NONE, context.getString(R.string.remove_contact)
         )
+        if (user.company.isNotBlank()) {
+            popupMenu.menu.add(0, ID_FIRE, Menu.NONE, context.getString(R.string.fire))
+        }
+
         // дальше создаем куда будет приходить пункт меню на который пользователь нажал
         popupMenu.setOnMenuItemClickListener {
             //вытаскиваем его индификатор и будем выполнять соответствующее
             // действие взависимости от идентификатора
             when (it.itemId) {
                 ID_MOVE_UP -> {
-                    actionListener.onUserMove(user,-1)
+                    actionListener.onUserMove(user, -1)
                 }
                 ID_MOVE_DOWN -> {
-                    actionListener.onUserMove(user,1)
+                    actionListener.onUserMove(user, 1)
                 }
                 ID_REMOVE -> {
                     actionListener.onUserDelete(user)
+                }
+                ID_FIRE -> {
+                    actionListener.onFireUse(user)
                 }
             }
             return@setOnMenuItemClickListener true
@@ -95,6 +107,7 @@ class UsersAdapter(
         private const val ID_MOVE_UP = 1
         private const val ID_MOVE_DOWN = 2
         private const val ID_REMOVE = 3
+        private const val ID_FIRE = 4
     }
 
     override fun onCreateViewHolder(
@@ -115,15 +128,22 @@ class UsersAdapter(
 
     override fun onBindViewHolder(holder: UsersViewHolder, position: Int) {
         val user = users[position]
+        val context = holder.itemView.context
+
         with(holder.binding) {
             //кладем юзера в тэг, сперва на все компоненты на которые
             // пользователь может нажать мы должны этот тэг
             // проинициализировать, но уже в onCreateViewHolder
             holder.itemView.tag = user
             moreImageViewButton.tag = user
+
             //обычное выполнение
             userNameTextView.text = user.name
-            userCompanyTextView.text = user.company
+
+            userCompanyTextView.text = user.company.ifBlank {
+                context.getString(R.string.unemployed)
+            }
+
             if (user.photo.isNotBlank()) {
                 Glide.with(photoImageView.context)
                     .load(user.photo)
