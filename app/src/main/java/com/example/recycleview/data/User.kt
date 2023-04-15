@@ -1,4 +1,4 @@
-package com.example.recycleview.model
+package com.example.recycleview.data
 
 data class User(
     val id: Long,

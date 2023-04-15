@@ -14,9 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RecycleView"
         tools:targetApi="31"
-        android:name=".App">
+        android:name=".presentation.App">
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

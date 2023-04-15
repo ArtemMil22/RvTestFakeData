@@ -1,4 +1,4 @@
-package com.example.recycleview.model
+package com.example.recycleview.data
 
 import com.github.javafaker.Faker
 import java.util.Collections
