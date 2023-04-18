@@ -32,7 +32,7 @@ class UserDetailsFragment: Fragment(){
     ): View? {
         binding = FragmentUserDetailsBinding.inflate(layoutInflater,container,false)
 
-        viewModel.userDetails.observe(viewLifecycleOwner, Observer {
+        viewModel.stateUserDetails.observe(viewLifecycleOwner, Observer {
             binding.userNameTextView.text = it.user.name
             if(it.user.photo.isNotBlank()){
                 Glide.with(this)
