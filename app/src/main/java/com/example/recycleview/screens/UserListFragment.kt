@@ -14,52 +14,84 @@ import com.example.recycleview.domain.UserActionListener
 import com.example.recycleview.presentation.UsersAdapter
 import com.example.recycleview.presentation.factory
 import com.example.recycleview.presentation.navigator
+import com.example.recycleview.tasks.EmptyResult
+import com.example.recycleview.tasks.ErrorResult
+import com.example.recycleview.tasks.PendingResult
+import com.example.recycleview.tasks.SuccessResult
 
-class UserListFragment: Fragment() {
+class UserListFragment : Fragment() {
 
     private lateinit var binding: FragmentUserListBinding
     private lateinit var adapter: UsersAdapter
 
-    private val viewModel : UserListViewModel by viewModels { factory() }
+    private val viewModel: UserListViewModel by viewModels { factory() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
-        binding = FragmentUserListBinding.inflate(inflater,container,false)
+        binding = FragmentUserListBinding.inflate(inflater, container, false)
 
-        adapter = UsersAdapter(object :UserActionListener{
-            override fun onUserMove(user: User, moveBy: Int) {
-                viewModel.moveUser(user,moveBy)
-            }
-
-            override fun onUserDelete(user: User) {
-                viewModel.deleteUser(user)
-            }
-
-            override fun onUserDetails(user: User) {
-                navigator().showDetails(user)
-            }
-
-            override fun onFireUse(user: User) {
-                viewModel.userFire(user)
-            }
-
-        })
+        adapter = UsersAdapter(viewModel
+//            object : UserActionListener {
+//            override fun onUserMove(user: User, moveBy: Int) {
+//                viewModel.onUserMove(user,moveBy)
+//            }
+//
+//            override fun onUserDelete(user: User) {
+//                viewModel.onUserDelete( user)
+//            }
+//
+//            override fun onUserDetails(user: User) {
+//                navigator().showDetails(user)
+//            }
+//
+//            override fun onFireUse(user: User) {
+//                viewModel.onFireUse(user)
+//            }
+//        }
+        )
 
         val layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
 
-
-        viewModel.usersLd.observe(viewLifecycleOwner, Observer {
-            adapter.users = it
+        viewModel.users.observe(viewLifecycleOwner, Observer {
+            hideAll()
+            when (it) {
+                is SuccessResult -> {
+                    binding.recyclerView.visibility = View.VISIBLE
+                    adapter.users = it.data
+                }
+                is ErrorResult -> {
+                    binding.tryAgainContainer.visibility = View.VISIBLE
+                }
+                is PendingResult -> {
+                    binding.progressBar.visibility = View.VISIBLE
+                }
+                is EmptyResult -> {
+                    binding.noUsersTextView.visibility = View.VISIBLE
+                }
+            }
         })
 
+        viewModel.actionShowDetails.observe(viewLifecycleOwner,
+            Observer {
+            it.getValue()?.let { user -> navigator().showDetails(user) }
+        })
+        viewModel.actionShowToast.observe(viewLifecycleOwner, Observer {
+            it.getValue()?.let { messageRes -> navigator().toast(messageRes) }
+        })
 
         return binding.root
     }
 
+    private fun hideAll() {
+        binding.recyclerView.visibility = View.GONE
+        binding.progressBar.visibility = View.GONE
+        binding.tryAgainContainer.visibility = View.GONE
+        binding.noUsersTextView.visibility = View.GONE
+    }
 }

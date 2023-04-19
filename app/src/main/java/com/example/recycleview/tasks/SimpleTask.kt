@@ -14,8 +14,7 @@ class SimpleTask<T>(
 ) : Task<T> {
 
     private val future: Future<*>
-
-    private var result: ResultState<T> = PendingResult()
+    private var result: Result<T> = PendingResult()
 
     init {
         future = executorService.submit {
@@ -51,7 +50,7 @@ class SimpleTask<T>(
     override fun await(): T {
         future.get()
         val result = this.result
-        if(result is SuccessResult) return result.data
+        if (result is SuccessResult) return result.data
         else throw (result as ErrorResult).error
     }
 
@@ -61,9 +60,9 @@ class SimpleTask<T>(
             val callback = this.valueCallback
             val errorCallback = this.errorCallBack
             if (result is SuccessResult && callback != null) {
-                callback.invoke(result.data)
+                callback(result.data)
                 clear()
-            } else if(result is ErrorResult && errorCallback != null){
+            } else if (result is ErrorResult && errorCallback != null) {
                 errorCallback.invoke(result.error)
                 clear()
             }
@@ -74,7 +73,6 @@ class SimpleTask<T>(
         valueCallback = null
         errorCallBack = null
     }
-
 }
 
 // внутри Callable мы можем описать любые действия, которые будут выполняться в другом потоке

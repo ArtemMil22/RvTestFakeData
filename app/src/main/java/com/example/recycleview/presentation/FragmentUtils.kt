@@ -7,6 +7,7 @@ import com.example.recycleview.domain.Navigator
 import com.example.recycleview.screens.UserDetailsViewModel
 import com.example.recycleview.screens.UserListViewModel
 
+@Suppress("UNCHECKED_CAST")
 class ViewModelFactory(
     private val app: App
 ) : ViewModelProvider.Factory {

@@ -1,22 +1,22 @@
 package com.example.recycleview.tasks
 
-sealed class ResultState<T>{
+sealed class Result<T>{
 
     @Suppress("UNCHECKED_CAST")
-    fun <R> map(mapper: (T) -> R): ResultState<R> {
+    fun <R> map(mapper: (T) -> R): Result<R> {
         if (this is SuccessResult) return SuccessResult(mapper(data))
-        return this as ResultState<R>
+        return this as Result<R>
       }
    }
 
     class SuccessResult<T>(
         val data: T
-    ) : ResultState<T>()
+    ) : Result<T>()
 
     class ErrorResult<T>(
         val error: Throwable
-    ) : ResultState<T>()
+    ) : Result<T>()
 
-    class PendingResult<T> : ResultState<T>()
+    class PendingResult<T> : Result<T>()
 
-    class EmptyResult<T> : ResultState<T>()
+    class EmptyResult<T> : Result<T>()

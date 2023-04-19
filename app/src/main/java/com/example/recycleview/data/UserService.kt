@@ -12,13 +12,8 @@ typealias UsersListener = (users: List<User>) -> Unit
 class UserService {
 
     private var users = mutableListOf<User>()
-
     private val listeners = mutableSetOf<UsersListener>()
     private var loaded = false
-
-    init {
-
-    }
 
     fun loadUsers(): Task<Unit> = SimpleTask<Unit>(Callable {
         Thread.sleep(2000)
@@ -30,8 +25,7 @@ class UserService {
                 name = faker.name().name(),
                 company = faker.company().name(),
                 photo = IMAGES[it % IMAGES.size]
-            )
-        }.toMutableList()
+            ) }.toMutableList()
         loaded = true
         notifyChanges()
     })
@@ -94,7 +88,7 @@ class UserService {
     }
 
     //уведомлять все слушатели
-    fun notifyChanges() {
+     fun notifyChanges() {
         if(!loaded) return
         listeners.forEach { it.invoke(users) }
     }

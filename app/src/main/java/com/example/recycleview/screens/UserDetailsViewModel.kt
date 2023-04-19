@@ -7,7 +7,7 @@ import com.example.recycleview.data.UserDetails
 import com.example.recycleview.data.UserService
 import com.example.recycleview.tasks.EmptyResult
 import com.example.recycleview.tasks.PendingResult
-import com.example.recycleview.tasks.ResultState
+import com.example.recycleview.tasks.Result
 import com.example.recycleview.tasks.SuccessResult
 
 class UserDetailsViewModel(
@@ -36,13 +36,11 @@ class UserDetailsViewModel(
     fun loadUser(userId: Long) {
         // если пользователь уже загружен то делать ни чего не будем
         if (currentState.userDetailsResult !is EmptyResult) return
-            // иначе состояние поменялось
-        _stateUserDetails.value = currentState
-            .copy(userDetailsResult = PendingResult())
+        // иначе состояние поменялось
+        _stateUserDetails.value = currentState.copy(userDetailsResult = PendingResult())
         userService.getById(userId)
             .onSuccessful {
-                _stateUserDetails.value = currentState
-                    .copy(userDetailsResult = SuccessResult(it))
+                _stateUserDetails.value = currentState.copy(userDetailsResult = SuccessResult(it))
             }
             .onError {
                 _actionShowToast.value = Event(R.string.cant_load_user_details)
@@ -52,11 +50,9 @@ class UserDetailsViewModel(
     }
 
     fun deleteUser() {
-      val userDetailsResult = currentState.userDetailsResult
-        //проверяем есть ли этот пользователь
-      if(userDetailsResult !is SuccessResult) return
-        _stateUserDetails.value = currentState
-            .copy(deletingInProgress = true)
+        val userDetailsResult = currentState.userDetailsResult
+        if (userDetailsResult !is SuccessResult) return
+        _stateUserDetails.value = currentState.copy(deletingInProgress = true)
         userService.deleteUser(userDetailsResult.data.user)
             .onSuccessful {
                 _actionShowToast.value = Event(R.string.user_has_been_deleted)
@@ -73,9 +69,9 @@ class UserDetailsViewModel(
     //data класс будет содержать в себе данные удобныне
     // для отрисоки на стороне фрагмента
     data class StateUserDetails(
-        val userDetailsResult: ResultState<UserDetails>,
+        val userDetailsResult: Result<UserDetails>,
         private val deletingInProgress: Boolean
-    ){
+    ) {
 
         val showContent: Boolean get() = userDetailsResult is SuccessResult
         val showProgress: Boolean get() = userDetailsResult is PendingResult || deletingInProgress
