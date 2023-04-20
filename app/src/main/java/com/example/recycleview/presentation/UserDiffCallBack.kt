@@ -1,7 +1,6 @@
 package com.example.recycleview.presentation
 
 import androidx.recyclerview.widget.DiffUtil
-import com.example.recycleview.data.User
 import com.example.recycleview.data.UserListItem
 
 class UserDiffCallBack(

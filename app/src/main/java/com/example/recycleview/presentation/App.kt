@@ -6,4 +6,5 @@ import com.example.recycleview.data.UserService
 class App:Application() {
 
     val userService = UserService()
+
 }

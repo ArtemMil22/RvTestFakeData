@@ -15,6 +15,7 @@
         android:layout_marginTop="6dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@android:string/unknownName"
         tools:src="@drawable/ic_user_avatar" />
 
     <TextView
@@ -54,7 +55,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:src= "@drawable/ic_more" />
+        android:contentDescription="@android:string/unknownName"
+        tools:src= "@drawable/ic_more" />
 
     <ProgressBar
         android:id="@+id/itemProgressBar"

@@ -6,14 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recycleview.data.User
 import com.example.recycleview.databinding.FragmentUserListBinding
 import com.example.recycleview.domain.UserActionListener
+import com.example.recycleview.domain.factory
+import com.example.recycleview.domain.navigator
 import com.example.recycleview.presentation.UsersAdapter
-import com.example.recycleview.presentation.factory
-import com.example.recycleview.presentation.navigator
 import com.example.recycleview.tasks.EmptyResult
 import com.example.recycleview.tasks.ErrorResult
 import com.example.recycleview.tasks.PendingResult
@@ -34,31 +33,29 @@ class UserListFragment : Fragment() {
 
         binding = FragmentUserListBinding.inflate(inflater, container, false)
 
-        adapter = UsersAdapter(viewModel
-//            object : UserActionListener {
-//            override fun onUserMove(user: User, moveBy: Int) {
-//                viewModel.onUserMove(user,moveBy)
-//            }
-//
-//            override fun onUserDelete(user: User) {
-//                viewModel.onUserDelete( user)
-//            }
-//
-//            override fun onUserDetails(user: User) {
-//                navigator().showDetails(user)
-//            }
-//
-//            override fun onFireUse(user: User) {
-//                viewModel.onFireUse(user)
-//            }
-//        }
-        )
+        adapter = UsersAdapter(object : UserActionListener {
+            override fun onUserMove(user: User, moveBy: Int) {
+                viewModel.onUserMove(user, moveBy)
+            }
+
+            override fun onUserDelete(user: User) {
+                viewModel.onUserDelete(user)
+            }
+
+            override fun onUserDetails(user: User) {
+                navigator().showDetails(user)
+            }
+
+            override fun onFireUse(user: User) {
+                viewModel.onFireUse(user)
+            }
+        })
 
         val layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
 
-        viewModel.users.observe(viewLifecycleOwner, Observer {
+        viewModel.users.observe(viewLifecycleOwner) {
             hideAll()
             when (it) {
                 is SuccessResult -> {
@@ -75,16 +72,14 @@ class UserListFragment : Fragment() {
                     binding.noUsersTextView.visibility = View.VISIBLE
                 }
             }
-        })
+        }
 
-        viewModel.actionShowDetails.observe(viewLifecycleOwner,
-            Observer {
+        viewModel.actionShowDetails.observe(viewLifecycleOwner) {
             it.getValue()?.let { user -> navigator().showDetails(user) }
-        })
-        viewModel.actionShowToast.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.actionShowToast.observe(viewLifecycleOwner) {
             it.getValue()?.let { messageRes -> navigator().toast(messageRes) }
-        })
-
+        }
         return binding.root
     }
 

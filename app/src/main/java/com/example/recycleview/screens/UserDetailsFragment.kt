@@ -7,12 +7,11 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.example.recycleview.R
 import com.example.recycleview.databinding.FragmentUserDetailsBinding
-import com.example.recycleview.presentation.factory
-import com.example.recycleview.presentation.navigator
+import com.example.recycleview.domain.factory
+import com.example.recycleview.domain.navigator
 import com.example.recycleview.tasks.SuccessResult
 
 class UserDetailsFragment : Fragment() {
@@ -35,18 +34,20 @@ class UserDetailsFragment : Fragment() {
             layoutInflater, container, false
         )
 
-        viewModel.actionShowToast.observe(viewLifecycleOwner, Observer {
+        viewModel.actionShowToast.observe(viewLifecycleOwner) {
             it.getValue()?.let { messageRes -> navigator().toast(messageRes) }
-        })
-        viewModel.actionGoBack.observe(viewLifecycleOwner, Observer {
+        }
+        viewModel.actionGoBack.observe(viewLifecycleOwner) {
             it.getValue()?.let { navigator().goBack() }
-        })
+        }
 
-        viewModel.stateUserDetails.observe(viewLifecycleOwner, Observer {
+        viewModel.stateUserDetails.observe(viewLifecycleOwner) {
             // контент будем показывать только тогда когда результат успешен
             binding.contentContainer.visibility = if (it.showContent) {
+
                 val userDetails = (it.userDetailsResult as SuccessResult).data
                 binding.userNameTextView.text = userDetails.user.name
+
                 if (userDetails.user.photo.isNotBlank()) {
                     Glide.with(this)
                         .load(userDetails.user.photo)
@@ -59,13 +60,13 @@ class UserDetailsFragment : Fragment() {
                 }
                 binding.userDetailsTextView.text = userDetails.details
                 View.VISIBLE
+
             } else {
                 View.GONE
             }
             binding.progressBar.visibility = if (it.showProgress) View.VISIBLE else View.GONE
             binding.deleteButton.isEnabled = it.enableDeleteButton
-        })
-
+        }
         binding.deleteButton.setOnClickListener {
             viewModel.deleteUser()
         }
