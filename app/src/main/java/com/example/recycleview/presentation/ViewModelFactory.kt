@@ -1,12 +1,11 @@
 package com.example.recycleview.presentation
 
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.recycleview.domain.Navigator
 import com.example.recycleview.screens.UserDetailsViewModel
 import com.example.recycleview.screens.UserListViewModel
 
+@Suppress("UNCHECKED_CAST")
 class ViewModelFactory(
     private val app: App
 ) : ViewModelProvider.Factory {
@@ -26,7 +25,3 @@ class ViewModelFactory(
         return viewModel as T
     }
 }
-
-fun Fragment.factory() = ViewModelFactory(requireContext().applicationContext as App)
-
-fun Fragment.navigator() = requireActivity() as Navigator

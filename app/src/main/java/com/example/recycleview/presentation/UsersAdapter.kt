@@ -1,6 +1,5 @@
 package com.example.recycleview.presentation
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -11,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.recycleview.R
 import com.example.recycleview.data.User
+import com.example.recycleview.data.UserListItem
 import com.example.recycleview.databinding.ItemUserBinding
 import com.example.recycleview.domain.UserActionListener
 
@@ -29,29 +29,27 @@ class UsersAdapter(
         val binding: ItemUserBinding
     ) : RecyclerView.ViewHolder(binding.root)
 
-    var users: List<User> = emptyList()
-        @SuppressLint("NotifyDataSetChanged")
+    var users: List<UserListItem> = emptyList()
         set(newValue) {
             val diffCallBack = UserDiffCallBack(field, newValue)
             val diffResult = DiffUtil.calculateDiff(diffCallBack, true)
             field = newValue
             diffResult.dispatchUpdatesTo(this)
-            //notifyDataSetChanged()
         }
 
     // в качестве аргумента приходит вьюшка на которую юзер нажал
-    override fun onClick(v: View?) {
+    override fun onClick(v: View) {
         //вытаскиваем пользователя из тэга и будем его хранить в тэге нашей вью
-        val user = v?.tag as User
+        val user = v.tag as User
         when (v.id) {
             R.id.moreImageViewButton -> {
                 // реализация контекстного меню
                 showPopupMenu(v)
+            }  else -> {
+            actionListener.onUserDetails(user)
             }
-            else -> actionListener.onUserDetails(user)
         }
     }
-
     // фун для popupMenu с тремя действиями и у каждого
     // должен быть свой индификатор в компаньоне обжекте
     private fun showPopupMenu(view: View) {
@@ -59,7 +57,7 @@ class UsersAdapter(
         val popupMenu = PopupMenu(view.context, view)
 
         val user = view.tag as User
-        val position = users.indexOfFirst { it.id == user.id }
+        val position = users.indexOfFirst { it.user.id == user.id }
 
         // для добавления ресурса вместо стринг добавим контекст
         val context = view.context
@@ -115,19 +113,17 @@ class UsersAdapter(
     ): UsersViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ItemUserBinding.inflate(inflater, parent, false)
-
         // слушатель на нажатие элемент самого списка и кнопки море и передать
         // this потому что мы наследуеся от интерфейса View.OnClickListener
-        binding.root.setOnClickListener(this)
         binding.moreImageViewButton.setOnClickListener(this)
-
         return UsersViewHolder(binding)
     }
 
     override fun getItemCount(): Int = users.size
 
     override fun onBindViewHolder(holder: UsersViewHolder, position: Int) {
-        val user = users[position]
+        val userListItem = users[position]
+        val user = userListItem.user
         val context = holder.itemView.context
 
         with(holder.binding) {
@@ -136,6 +132,17 @@ class UsersAdapter(
             // проинициализировать, но уже в onCreateViewHolder
             holder.itemView.tag = user
             moreImageViewButton.tag = user
+
+            //рефакторинг с дополнением userListItem
+            if(userListItem.isInProgress){
+                moreImageViewButton.visibility = View.INVISIBLE
+                itemProgressBar.visibility = View.VISIBLE
+                holder.binding.root.setOnClickListener(null)
+            } else {
+                moreImageViewButton.visibility = View.VISIBLE
+                itemProgressBar.visibility = View.INVISIBLE
+                holder.binding.root.setOnClickListener(this@UsersAdapter)
+            }
 
             //обычное выполнение
             userNameTextView.text = user.name
@@ -152,6 +159,7 @@ class UsersAdapter(
                     .error(R.drawable.ic_user_avatar)
                     .into(photoImageView)
             } else {
+                Glide.with(photoImageView.context).clear(photoImageView)
                 photoImageView.setImageResource(R.drawable.ic_user_avatar)
             }
         }

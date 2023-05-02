@@ -21,6 +21,8 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_marginTop="16dp"
+                android:contentDescription="@android:string/unknownName"
+                tools:ignore="ImageContrastCheck"
                 tools:src="@drawable/ic_user_avatar" />
 
             <TextView
@@ -39,6 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:textSize="16sp"
+                android:contentDescription="@android:string/unknownName"
                 tools:text="Lorem ipsum" />
 
             <Button
@@ -47,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:textAllCaps="true"
                 android:layout_marginTop="12dp"
-                android:text="Delete"/>
+                android:text="@string/delete"/>
 
         </LinearLayout>
 
